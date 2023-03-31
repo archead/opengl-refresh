@@ -110,9 +110,9 @@ int main()
     //----------------------------------------------------------------
 
     float rotationdeg = 0.0f;
-    glm::vec3 modelAxis = glm::vec3(0.0f, 1.0f, 0.0f);
+    glm::vec3 modelAxis = glm::vec3(0.5f, 1.0f, 0.3f);
     float spinSpeed = 0.5f;
-    bool spin = false;
+    bool spin = true;
 
 
     while (!glfwWindowShouldClose(window))
@@ -149,10 +149,10 @@ int main()
 
         // ImGui Menu Items
         {   
-            ImGui::Begin("Debug Menu");                          // Create a window called "Debug Menu" and append into it.
+            ImGui::Begin("Debug Menu"); // Create a window called "Debug Menu" and append into it.
             ImGui::Text("Press M to toggle mouse");
             ImGui::Text("Model Rotation Matrix:");
-            ImGui::Checkbox("Continuous Spin", &spin);           // Edit bools storing our window open/close state
+            ImGui::Checkbox("Continuous Spin", &spin); // Edit bools storing our window open/close state
             ImGui::SliderFloat("Spin Speed", &spinSpeed, 0.0f, 10.0f);
             if (spin) rotationdeg += spinSpeed;
             ImGui::SliderFloat3("XYZ", glm::value_ptr(modelAxis), 0.01f, 1.0f);
@@ -217,7 +217,8 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 
 void mouse_callback(GLFWwindow* window, double xposIn, double yposIn)
 {
-    camera.mouseMovement(&lastX, &lastY, xposIn, yposIn);
+    if(!mouseToggle)
+        camera.mouseMovement(&lastX, &lastY, xposIn, yposIn);
 }
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
