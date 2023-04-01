@@ -7,6 +7,8 @@
 #include <fstream>
 #include <sstream>
 #include <iostream>
+#include <glm/gtc/type_ptr.hpp>
+
 
 class Shader
 {
@@ -77,13 +79,30 @@ public:
     {
         glUniform1i(glGetUniformLocation(ID, name.c_str()), (int)value);
     }
+
     void setInt(const std::string& name, int value) const
     {
         glUniform1i(glGetUniformLocation(ID, name.c_str()), value);
     }
+
     void setFloat(const std::string& name, float value) const
     {
         glUniform1f(glGetUniformLocation(ID, name.c_str()), value);
+    }
+
+    void setVec3(const std::string& name, float value1, float value2, float value3) const
+    {
+        glUniform3f(glGetUniformLocation(ID, name.c_str()), value1, value2, value3);
+    }
+
+    void setVec3(const std::string& name, glm::vec3 vec) const
+    {
+        glUniform3f(glGetUniformLocation(ID, name.c_str()), vec.x, vec.y, vec.z);
+    }
+
+    void setMat4(const std::string& name, glm::mat4 matrix) const
+    {
+        glUniformMatrix4fv(glGetUniformLocation(ID, name.c_str()), 1, GL_FALSE, glm::value_ptr(matrix));
     }
 
 private:

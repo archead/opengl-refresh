@@ -16,12 +16,13 @@ class Camera
 public:
 	float yaw, pitch, fov, sensitivity, moveSpeed;
 	glm::vec3 cameraPos, cameraFront, cameraUp;
+	bool firstMouse = true;
 
 
 	Camera(glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f),
 		glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f),
 		glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f),
-		float fov = 90.0f,
+		float fov = 75.0f,
 		float pitch = 0.0f,
 		float yaw = -90.0f, // yaw is initialized to -90.0 degrees since a yaw of 0.0 results in a direction vector pointing to the right so we initially rotate a bit to the left.
 		float sensitivity = 0.1,
@@ -62,8 +63,16 @@ public:
 
 	void mouseMovement(float *lastX, float *lastY, double xposIn, double yposIn)
 	{
+
 		float xpos = (float)xposIn;
 		float ypos = (float)yposIn;
+
+		if (firstMouse)
+		{
+			*lastX = xpos;
+			*lastY = ypos;
+			firstMouse = false;
+		}
 
 		float xoffset = xpos - *lastX;
 		float yoffset = *lastY - ypos; // swap this around for inverted (flight stick) style controls

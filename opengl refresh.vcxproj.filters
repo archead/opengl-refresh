@@ -13,6 +13,9 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="shaders">
+      <UniqueIdentifier>{00f5e894-ee7f-4eaf-bc1f-907471cba358}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -96,6 +99,24 @@
   <ItemGroup>
     <None Include="shader.vert" />
     <None Include="shader.frag" />
+    <None Include="lightObjShader.frag">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="lightObjShader.vert">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="lightingShader.frag">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="lightingShader.vert">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="chapter 1 shader.vert">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="chapter 1 shader.frag">
+      <Filter>shaders</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Library Include="libs\glfw3.lib" />

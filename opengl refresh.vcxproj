@@ -48,6 +48,12 @@
     <ClInclude Include="vertices.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="chapter 1 shader.frag" />
+    <None Include="chapter 1 shader.vert" />
+    <None Include="lightObjShader.frag" />
+    <None Include="lightObjShader.vert" />
+    <None Include="lightingShader.frag" />
+    <None Include="lightingShader.vert" />
     <None Include="shader.frag" />
     <None Include="shader.vert" />
   </ItemGroup>

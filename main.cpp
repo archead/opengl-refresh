@@ -65,28 +65,32 @@ int main()
     glfwSetCursorPosCallback(window, mouse_callback);
     //----------------------------------------------------------
 
-
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
-    Shader shader("shader.vert", "shader.frag");
-    shader.use();
+    Shader lightingShader("lightingShader.vert", "lightingShader.frag");
+    Shader lightObjShader("lightObjShader.vert", "lightObjShader.frag");
 
     VertexArray va;
     VertexBuffer vb(vertices, sizeof(vertices));
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
     va.unbind();
 
-    Texture texture1("container.jpg", 0);
-    texture1.SetSampler2D(shader.ID, "texture1");
+    VertexArray lightVAO;
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+    lightVAO.unbind();
+
+    //Texture texture1("container.jpg", 0);
+    //texture1.SetSampler2D(shader.ID, "texture1");
+
+    lightingShader.use();
+    lightingShader.setVec3("objectColor", 1.0f, 0.5f, 0.31f);
+    lightingShader.setVec3("lightColor", 1.0f, 1.0f, 1.00f);
     
     glEnable(GL_DEPTH_TEST);
-
-    unsigned int modelLoc = glGetUniformLocation(shader.ID, "model");
-    unsigned int viewLoc = glGetUniformLocation(shader.ID, "view");
-    unsigned int projectionLoc = glGetUniformLocation(shader.ID, "projection");
 
     //----------------------IMGUI INIT-------------------------------
     // Setup Dear ImGui context
@@ -114,38 +118,55 @@ int main()
     float spinSpeed = 0.5f;
     bool spin = true;
 
+    glm::vec3 lightPos = glm::vec3(1.2f, 1.0f, 1.0f);
+    lightingShader.setVec3("lightPos", lightPos);
 
     while (!glfwWindowShouldClose(window))
     {
         processInput(window);
 
+        float currentFrame = glfwGetTime();
+        deltaTime = currentFrame - lastFrame;
+        lastFrame = currentFrame;
+
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-        shader.use();
 
         // Start the Dear ImGui frame
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
+        lightingShader.use();
         glm::mat4 model = glm::mat4(1.0f);
         model = glm::rotate(model, glm::radians(rotationdeg), glm::vec3(modelAxis.x, modelAxis.y, modelAxis.z));
-        glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-
-        float currentFrame = glfwGetTime();
-        deltaTime = currentFrame - lastFrame;
-        lastFrame = currentFrame;
+        lightingShader.setMat4("model", model);
 
         glm::mat4 view = camera.getViewMatrix(); 
-        glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
+        lightingShader.setMat4("view", view);
 
         glm::mat4 projection = glm::perspective(glm::radians(camera.fov), (float)resWidth / float(resHeight), 0.1f, 100.0f);
-        glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
+        lightingShader.setMat4("projection", projection);
 
         va.bind();
         glDrawArrays(GL_TRIANGLES, 0, 36);
         va.unbind();
+
+        lightObjShader.use();
+        model = glm::mat4(1.0f);
+        model = glm::translate(model, lightPos);
+        model = glm::scale(model, glm::vec3(0.2f));
+        lightObjShader.setMat4("model", model);
+
+        view = camera.getViewMatrix();
+        lightObjShader.setMat4("view", view);
+
+        projection = glm::perspective(glm::radians(camera.fov), (float)resWidth / float(resHeight), 0.1f, 100.0f);
+        lightObjShader.setMat4("projection", projection);
+
+        lightVAO.bind();
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+        lightVAO.unbind();
 
         // ImGui Menu Items
         {   
@@ -158,7 +179,7 @@ int main()
             ImGui::SliderFloat3("XYZ", glm::value_ptr(modelAxis), 0.01f, 1.0f);
             ImGui::Text("FOV:");
             ImGui::SliderFloat("FOV Scale", &camera.fov, 1.0f, 120.0f);
-            ImGui::Text("Camera Yaw and Pitch Values:");
+            ImGui::Text("Yaw and Pitch");
             ImGui::Text("Yaw: %f", camera.yaw);
             ImGui::Text("Pitch: %f", camera.pitch);
             ImGui::Text("Camera Coords:");
@@ -166,7 +187,9 @@ int main()
             ImGui::Text("Y: %f", camera.cameraPos.y);
             ImGui::Text("Z: %f", camera.cameraPos.z);
 
-            ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
+            ImGui::Text("Application avg %.3f ms/frame", 1000.0f / io.Framerate);
+            ImGui::Text("%.1f FPS", io.Framerate);
+
             ImGui::End();
         }
 
@@ -217,8 +240,11 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 
 void mouse_callback(GLFWwindow* window, double xposIn, double yposIn)
 {
+
     if(!mouseToggle)
+    {
         camera.mouseMovement(&lastX, &lastY, xposIn, yposIn);
+    }
 }
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
