@@ -7,3 +7,8 @@ A refresh of my previous opengl project with more features and (hopefully) clean
 ## Version 2: Keyboard + mouse support
 ![2023-03-31 14-10-55](https://user-images.githubusercontent.com/55419973/229233623-029c375e-b0fc-4665-8644-f2b19ff78cc0.gif)
 
+## Version 3: Let there be light!
+<!--- ![2023-03-31 14-10-55](https://user-images.githubusercontent.com/55419973/229313582-c7d37c79-384a-40dc-8f77-fb24f10fc1b3.gif) -->
+<img src="https://user-images.githubusercontent.com/55419973/229313582-c7d37c79-384a-40dc-8f77-fb24f10fc1b3.gif" width="400">
+
+
