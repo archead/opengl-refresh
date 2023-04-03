@@ -109,17 +109,15 @@ int main()
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init(glsl_version);
 
-    // Our state
-    ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
     //----------------------------------------------------------------
 
-    float rotationdeg = 0.0f;
-    glm::vec3 modelAxis = glm::vec3(0.5f, 1.0f, 0.3f);
+    float rotationdeg = 45.0f;
+    glm::vec3 modelAxis = glm::vec3(0.0f, 1.0f, 0.0f);
     float spinSpeed = 0.5f;
-    bool spin = true;
+    bool spin = false;
 
-    glm::vec3 lightPos = glm::vec3(1.2f, 1.0f, 1.0f);
-    lightingShader.setVec3("lightPos", lightPos);
+    //glm::vec3 lightPos = glm::vec3(1.2f, 1.0f, 1.0f);
+    //lightingShader.setVec3("lightPos", lightPos);
 
     while (!glfwWindowShouldClose(window))
     {
@@ -137,13 +135,18 @@ int main()
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
+
         lightingShader.use();
+        glm::vec3 lightPos = glm::vec3(0.6f, 1.0f, 1.0f);//glm::vec3(sin(glfwGetTime()), cos(glfwGetTime()) * 0.7f + 0.2f, cos(glfwGetTime()));
+        lightingShader.setVec3("lightPos", lightPos);
+
         glm::mat4 model = glm::mat4(1.0f);
         model = glm::rotate(model, glm::radians(rotationdeg), glm::vec3(modelAxis.x, modelAxis.y, modelAxis.z));
         lightingShader.setMat4("model", model);
 
         glm::mat4 view = camera.getViewMatrix(); 
         lightingShader.setMat4("view", view);
+        lightingShader.setVec3("viewPos", camera.cameraPos);
 
         glm::mat4 projection = glm::perspective(glm::radians(camera.fov), (float)resWidth / float(resHeight), 0.1f, 100.0f);
         lightingShader.setMat4("projection", projection);
