@@ -65,33 +65,6 @@ int main()
     glfwSetCursorPosCallback(window, mouse_callback);
     //----------------------------------------------------------
 
-    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-
-    Shader lightingShader("lightingShader.vert", "lightingShader.frag");
-    Shader lightObjShader("lightObjShader.vert", "lightObjShader.frag");
-
-    VertexArray va;
-    VertexBuffer vb(vertices, sizeof(vertices));
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
-    glEnableVertexAttribArray(1);
-    va.unbind();
-
-    VertexArray lightVAO;
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
-    lightVAO.unbind();
-
-    //Texture texture1("container.jpg", 0);
-    //texture1.SetSampler2D(shader.ID, "texture1");
-
-    lightingShader.use();
-    lightingShader.setVec3("objectColor", 1.0f, 0.5f, 0.31f);
-    lightingShader.setVec3("lightColor", 1.0f, 1.0f, 1.00f);
-    
-    glEnable(GL_DEPTH_TEST);
-
     //----------------------IMGUI INIT-------------------------------
     // Setup Dear ImGui context
     IMGUI_CHECKVERSION();
@@ -111,14 +84,111 @@ int main()
 
     //----------------------------------------------------------------
 
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
+    Shader lightingShader("lightingShader.vert", "lightingShader.frag");
+    Shader lightObjShader("lightObjShader.vert", "lightObjShader.frag");
+
+    VertexArray va;
+    VertexBuffer vb(vertices, sizeof(vertices));
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+    glEnableVertexAttribArray(2);
+    va.unbind();
+
+    VertexArray lightVAO;
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+    lightVAO.unbind();
+
+    lightingShader.use();
+
+    Texture diffuseTexture("container2.png", 0);
+    diffuseTexture.SetSampler2D(lightingShader.ID, "material.diffuse");
+
+    Texture specularMap("container2_specular.png", 1);
+    specularMap.SetSampler2D(lightingShader.ID, "material.specular");
+
+    lightingShader.setVec3("lightColor", 0.0f, 0.7f, 0.0f);
+
+    lightingShader.setVec3("material.ambient", 1.0f, 0.5f, 0.31f);
+    lightingShader.setVec3("material.diffuse", 1.0f, 0.5f, 0.31f);
+    lightingShader.setVec3("material.specular", 0.5f, 0.5f, 0.5f);
+    lightingShader.setFloat("material.shininess", 32.0f);
+
+    lightingShader.setVec3("dirlight.ambient", 0.2f, 0.2f, 0.2f);
+    lightingShader.setVec3("dirlight.diffuse", 0.5f, 0.5f, 0.5f); // darken diffuse light a bit
+    lightingShader.setVec3("dirlight.specular", 1.0f, 1.0f, 1.0f);
+    lightingShader.setVec3("dirLight.direction", -0.2f, -1.0f, -0.3f);
+
+
+    glm::vec3 lightPos = glm::vec3(1.2f, 1.0f, 1.0f);
+    lightingShader.setVec3("lightPos", lightPos);
+
+
+    glm::vec3 pointLightPositions[] = {
+        glm::vec3(0.7f,  0.2f,  2.0f),
+        glm::vec3(2.3f, -3.3f, -4.0f),
+        glm::vec3(-4.0f,  2.0f, -12.0f),
+        glm::vec3(0.0f,  0.0f, -3.0f)
+    };
+
+    lightingShader.setVec3("pointLights[0].position", pointLightPositions[0]);
+    lightingShader.setFloat("pointLights[0].constant", 1.0f);
+    lightingShader.setFloat("pointLights[0].linear", 0.09f);
+    lightingShader.setFloat("pointLights[0].quadratic", 0.032f);
+    lightingShader.setVec3("pointLights[0].ambient", 0.2f, 0.2f, 0.2f);
+    lightingShader.setVec3("pointLights[0].diffuse", 0.5f, 0.5f, 0.5f); // darken diffuse light a bit
+    lightingShader.setVec3("pointLights[0].specular", 1.0f, 1.0f, 1.0f);
+
+    lightingShader.setVec3("pointLights[1].position", pointLightPositions[1]);
+    lightingShader.setFloat("pointLights[1].constant", 1.0f);
+    lightingShader.setFloat("pointLights[1].linear", 0.09f);
+    lightingShader.setFloat("pointLights[1].quadratic", 0.032f);
+    lightingShader.setVec3("pointLights[1].ambient", 0.2f, 0.2f, 0.2f);
+    lightingShader.setVec3("pointLights[1].diffuse", 0.5f, 0.5f, 0.5f); // darken diffuse light a bit
+    lightingShader.setVec3("pointLights[1].specular", 1.0f, 1.0f, 1.0f);
+
+    lightingShader.setVec3("pointLights[2].position", pointLightPositions[2]);
+    lightingShader.setFloat("pointLights[2].constant", 1.0f);
+    lightingShader.setFloat("pointLights[2].linear", 0.09f);
+    lightingShader.setFloat("pointLights[2].quadratic", 0.032f);
+    lightingShader.setVec3("pointLights[2].ambient", 0.2f, 0.2f, 0.2f);
+    lightingShader.setVec3("pointLights[2].diffuse", 0.5f, 0.5f, 0.5f); // darken diffuse light a bit
+    lightingShader.setVec3("pointLights[2].specular", 1.0f, 1.0f, 1.0f);
+
+    lightingShader.setVec3("pointLights[3].position", pointLightPositions[3]);
+    lightingShader.setFloat("pointLights[3].constant", 1.0f);
+    lightingShader.setFloat("pointLights[3].linear", 0.09f);
+    lightingShader.setFloat("pointLights[3].quadratic", 0.032f);
+    lightingShader.setVec3("pointLights[3].ambient", 0.2f, 0.2f, 0.2f);
+    lightingShader.setVec3("pointLights[3].diffuse", 0.5f, 0.5f, 0.5f); // darken diffuse light a bit
+    lightingShader.setVec3("pointLights[3].specular", 1.0f, 1.0f, 1.0f);
+
+
+    glm::vec3 cubePositions[] = {
+        glm::vec3(0.0f,  0.0f,  0.0f),
+        glm::vec3(2.0f,  5.0f, -15.0f),
+        glm::vec3(-1.5f, -2.2f, -2.5f),
+        glm::vec3(-3.8f, -2.0f, -12.3f),
+        glm::vec3(2.4f, -0.4f, -3.5f),
+        glm::vec3(-1.7f,  3.0f, -7.5f),
+        glm::vec3(1.3f, -2.0f, -2.5f),
+        glm::vec3(1.5f,  2.0f, -2.5f),
+        glm::vec3(1.5f,  0.2f, -1.5f),
+        glm::vec3(-1.3f,  1.0f, -1.5f)
+    };
+
+    // IMGUI Cube Model Controls
     float rotationdeg = 45.0f;
     glm::vec3 modelAxis = glm::vec3(0.0f, 1.0f, 0.0f);
     float spinSpeed = 0.5f;
     bool spin = false;
 
-    //glm::vec3 lightPos = glm::vec3(1.2f, 1.0f, 1.0f);
-    //lightingShader.setVec3("lightPos", lightPos);
-
+    glEnable(GL_DEPTH_TEST);
     while (!glfwWindowShouldClose(window))
     {
         processInput(window);
@@ -137,12 +207,10 @@ int main()
 
 
         lightingShader.use();
-        glm::vec3 lightPos = glm::vec3(0.6f, 1.0f, 1.0f);//glm::vec3(sin(glfwGetTime()), cos(glfwGetTime()) * 0.7f + 0.2f, cos(glfwGetTime()));
-        lightingShader.setVec3("lightPos", lightPos);
 
         glm::mat4 model = glm::mat4(1.0f);
-        model = glm::rotate(model, glm::radians(rotationdeg), glm::vec3(modelAxis.x, modelAxis.y, modelAxis.z));
-        lightingShader.setMat4("model", model);
+        //model = glm::rotate(model, glm::radians(rotationdeg), glm::vec3(modelAxis.x, modelAxis.y, modelAxis.z));
+        //lightingShader.setMat4("model", model);
 
         glm::mat4 view = camera.getViewMatrix(); 
         lightingShader.setMat4("view", view);
@@ -152,14 +220,22 @@ int main()
         lightingShader.setMat4("projection", projection);
 
         va.bind();
-        glDrawArrays(GL_TRIANGLES, 0, 36);
+
+        for (unsigned int i = 0; i < 10; i++)
+        {
+            glm::mat4 model = glm::mat4(1.0f);
+            model = glm::translate(model, cubePositions[i]);
+            float angle = 20.0f * i;
+            model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
+            model = glm::rotate(model, glm::radians(rotationdeg), glm::vec3(modelAxis.x, modelAxis.y, modelAxis.z));
+            lightingShader.setMat4("model", model);
+
+            glDrawArrays(GL_TRIANGLES, 0, 36);
+        }
         va.unbind();
 
         lightObjShader.use();
-        model = glm::mat4(1.0f);
-        model = glm::translate(model, lightPos);
-        model = glm::scale(model, glm::vec3(0.2f));
-        lightObjShader.setMat4("model", model);
+        
 
         view = camera.getViewMatrix();
         lightObjShader.setMat4("view", view);
@@ -168,7 +244,14 @@ int main()
         lightObjShader.setMat4("projection", projection);
 
         lightVAO.bind();
-        glDrawArrays(GL_TRIANGLES, 0, 36);
+        for (int i = 0; i < 4; i++)
+        {
+            model = glm::mat4(1.0f);
+            model = glm::translate(model, pointLightPositions[i]);
+            model = glm::scale(model, glm::vec3(0.2f));
+            lightObjShader.setMat4("model", model);
+            glDrawArrays(GL_TRIANGLES, 0, 36);
+        }
         lightVAO.unbind();
 
         // ImGui Menu Items
